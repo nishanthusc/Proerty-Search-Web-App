@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type"content="text/html;charset=UTF-8">
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.js"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+	
+	
+	<script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.13.0/jquery.validate.js"></script>
+	
+
+	<!--<script type="text/javascript" src="https://ajax.microsoft.com/ajax/jQuery/jquery-1.4.2.min.js"></script>-->
+		
+	<style>
+            h2 {
+                padding-bottom: 20px;
+            }
+            .form-inline input.error {
+                border:1px solid red;
+            }
+            .form-inline select.error {
+                border:1px solid red;
+            }
+            .form-inline label.error {
+                color:red;
+                margin:0;
+                display: block;
+                text-align: right;
+                padding-top: 4px;
+            }
+            div.form-group {
+                height: 50px;
+                //padding-left: 12px;
+                padding-right: 12px;
+            }
+            div.zillow {
+                //text-align: right;
+                //float: right;
+                padding-right: 50px;
+                margin-bottom: 10px;
+                display: inline-block;
+                top:10px;
+            }
+
+            #historicalZestimate{
+
+            	margin-top: 10px;
+            }
+
+			.carousel-inner > .item > img {
+   				 margin: auto;
+			}
+
+            body {
+				    background-image: http://www.neovisual.cz/files/V0779-d9.jpg;
+				    color:#F1AB53;
+				}
+
+			#basicTbl{
+
+				background-color: white;
+				font: 12px arial, sans-serif;
+				color:#000000;
+				/*height:600px;*/
+			}
+
+			.carousel-caption {
+				
+			   margin:0 auto;	
+			   margin-top: 100px;
+			   background: rgba(50, 60, 50, 0.35);
+			   padding: 1%;
+			   text-align: left;
+			   left:0;
+			   right:0;
+			   bottom:0;
+			}
+
+			.carousel-inner{
+				background-color: #FFF;
+			}
+			#chartGrid{
+				border-width: 1px;
+				border-color: #000;
+			}
+			#captionTxt1{
+				margin-top: 5px;
+
+			}
+			.carousel-indicators li {
+
+				float:right;
+				margin: 1px;
+				background-color:#C37936;
+				border-color:#C37936;
+			}
+
+			#basicInfo{
+				height: 600px;
+			}
+
+			#container{
+				margin-left: 40px;
+			}
+			.nav-tabs a{
+		        background-color: #C37936;
+		        opacity: 0.9;
+		        color: #FFFFFF;
+		    }
+		    #notFound{
+		    	text-align: center;
+		    	color: red;
+		    }
+
+		    #linkZillow{
+		    	color:#C37936;
+		    }
+		    #copyRight{
+		    	color:white ;
+		    	font-weight: bold;
+		    }
+		    #btnSbmt{
+		    	background-color: #C37936;
+		    	color: white;
+		    	border-color: #C37936;
+		    }
+        </style>
+
+
+
+
+
+	<script type="text/javascript">
+
+		var obj;
+		$(document).ready(function () {
+			$('#noresult').hide();
+			$('#tabs').hide();
+		$('#searchForm').validate({
+			rules: {
+            streetName: {
+                
+                required: true
+            },
+            cityName: {
+                required: true
+               
+            },
+            stateName:{
+            	required: true,
+            },
+          },
+		  messages: {
+            
+            streetName: "This field is required.",
+            cityName: "This field is required.",
+            stateInput: "This field is required."
+         },
+		
+		submitHandler: function(){
+				
+					var streetInput = $('#streetAddress').val();
+					var cityNam = $('#city').val();
+					var stateNam = $('#state').val();
+					//alert(streetInput);
+					
+					$.ajax({ 
+						//url: 'http://default-environment-kfepnj8tpz.elasticbeanstalk.com/',
+						//url: 'http://default-environment-kfepnj8tpz.elasticbeanstalk.com/',
+						url:'http://hw8nishanth-env.elasticbeanstalk.com',
+						// this is the parameter list
+						data:  { streetInput: streetInput, 
+								cityInput: cityNam, 
+								stateInput:stateNam},
+						type: 'GET',
+						success: function(output){
+							//alert(output);
+							$('#tabs').show();
+							if(output!=""){
+
+								obj = JSON.parse(output);
+								//alert(obj.homedetails);
+								//alert("pass");
+								$('#basicInfo').html(
+										
+									"<div class='table-responsive'><table id='basicTbl' class='table'>"+
+										"<tr><td style='font-size:15px' colspan='3'>See more details for <a href='"+obj.homdetails+"'style='text-decoration:none;' target='_BLANK' id='linkZillow'>"+obj.street+", "+obj.city+", "+obj.state+" - "+obj.zipcode+"</a> on Zillow</td>"+
+										
+										"<td><button name='fb' id='fb' class='btn btn-primary active' onclick='fb_post()'>Share on <b>facebook</b></button></td>"+
+										"</tr>"+
+										"<tr><td>Property Type :</td><td>"+obj.propertyType+"</td>"+
+												"<td>Last Sold Price :</td><td>"+obj.lastSoldPrice+"</td></tr>"+
+ 											"<tr>"+
+                                				"<td>Year Built :</td><td>"+obj.yearBuilt+"</td>"+
+                                				"<td>Last Sold Date :</td><td>"+obj.lastSoldDate+"</td>"+
+                                			"</tr>"+
+
+                                			"<tr>"+
+                               					"<td>Lot Size :</td><td>"+obj.lotSize+"</td>"+
+                                				"<td>Zestimate<sup>&reg</sup> Property Estimate as of "+obj.zestimatePropEstimateDate+":</td><td>"+obj.zestimatePropEstimateVal+
+												"</td></tr>"+
+
+											"<tr>"+
+                              					"<td>Finished Area  :</td>"+
+                              					"<td>"+obj.finishedArea+"</td>"+ 
+                              					"<td>30 Days Overall Change: </td>"+
+                              					"<td>"+(obj.thirtyDaysOverallChangeSymbol == 'up' ?" <img src ='http://cs-server.usc.edu:45678/hw/hw6/up_g.gif'>":(obj.thirtyDaysOverallChangeSymbol=="N/A")?"":" <img src ='http://cs-server.usc.edu:45678/hw/hw6/down_r.gif'>")+
+    												""+obj.thirtyDaysOverallChange+" </td>"+
+    										"</tr>"+
+
+    										"<tr>"+
+                              					"<td>Bathrooms :</td>"+
+                              					"<td>"+obj.bathrooms+"</td>"+
+                               					"<td>All Time Property Range :</td>"+
+                               					"<td>"+obj.allTimePropRangeLow +"-"+obj.allTimePropRangeHigh+"</td>"+
+                               				"</tr>"+
+
+                               				"<tr>"+
+			                               		"<td>Bedrooms :</td>"+
+			                               		"<td>"+obj.bedrooms +"</td>"+
+			                            		"<td>Rent Zestimate<sup>&reg</sup> Valuation as of"+ obj.rentZestimateDate+":</td>"+
+			                            		"<td>"+obj.rentZestimateVal+"</td>"+
+			                            	"</tr>"+
+
+			                            	"<tr>"+
+			                               		"<td>Tax Assessment Year :</td>"+
+			                               		"<td>"+obj.taxAssessmentYear+"</td>"+
+			                              		"<td>30 Days Rent Change: </td>"+
+			                             		"<td>"+(obj.thirtyDaysRentChangeSymbol == 'up' ?" <img src ='http://cs-server.usc.edu:45678/hw/hw6/up_g.gif'>":(obj.thirtyDaysRentChangeSymbol=="N/A")?"":" <img src ='http://cs-server.usc.edu:45678/hw/hw6/down_r.gif'>")+
+    												""+obj.thirtyDaysRentChange+" </td>"+
+			                            	"</tr>"+
+
+			                            	"<tr>"+
+			                               		"<td>Tax Assessment :</td>"+
+			                               		"<td>"+obj.taxAssessment +"</td>"+
+			                               		"<td>All Time Rent Change :</td>"+
+			                               		"<td>"+ obj.allTimeRentRangeLow + "-"+obj.allTimeRentRangeHigh+"</td>"+
+			                               	"</tr>"+
+
+									"</table></div>"+
+									"<center><p id='copyRight'>&copy Zillow, Inc., 2006-2014. Use is subject to <a href='http://www.zillow.com/corp/Terms.htm'>Terms of Use</a><br><a href='http://www.zillow.com/zestimate/'>What's a Zestimate?</a></p></center>"
+
+
+
+								); //closing for .html call
+								
+								
+								$('#historicalZestimate').html(
+
+
+									"<div id='myCarousel' class='carousel slide'>"+
+			                            "<ol class='carousel-indicators'>"+
+			                                "<li data-target='#myCarousel' data-slide-to='0' class='active'></li>"+
+			                                "<li data-target='#myCarousel' data-slide-to='1'></li>"+
+			                                "<li data-target='#myCarousel' data-slide-to='2'></li>"+
+			                            "</ol>"+   
+			                            "<div class='carousel-inner'>"+
+			                                "<div class='item active'>"+
+			                                    "<img src='"+obj.oneYearImage+"' alt='First slide'>"+
+			                                    
+			                                    "<div class='carousel-caption'><h4 id='captionTxt1'>&nbsp&nbsp&nbspHistorical Zestimate for the past 1 year</h4><p>&nbsp&nbsp&nbsp&nbsp&nbsp"+obj.street+","+obj.city+", "+obj.state+"-"+obj.zipcode+
+			                                    "</p></div>"+
+			                                   
+			                                "</div>"+
+		                                "<div class='item'>"+
+		                                    "<img src='"+obj.fiveYearImage+"' alt='Second slide'>"+
+		                                   	"<div class='carousel-caption'><h4 id='captionTxt1'>&nbsp&nbsp&nbspHistorical Zestimate for the past 5 years</h4><p>&nbsp&nbsp&nbsp&nbsp"+obj.street+","+obj.city+", "+obj.state+"-"+obj.zipcode+
+			                                    "</p></div>"+
+		                                "</div>"+
+		                                "<div class='item'>"+
+		                                    "<img src='"+obj.tenYearImage+"' alt='Third slide'>"+
+		                                    "<div class='carousel-caption'><h4 id='captionTxt1'>&nbsp&nbsp&nbspHistorical Zestimate for the past 10 years</h4><p>&nbsp&nbsp&nbsp&nbsp"+obj.street+","+obj.city+", "+obj.state+"-"+obj.zipcode+
+			                                    "</p></div>"+
+		                                "</div>"+
+		                            "</div>"+
+		                            "<a class='carousel-control left' href='#myCarousel' data-slide='prev'><span class='glyphicon glyphicon-chevron-left'></span></a>"+
+		                            "<a class='carousel-control right' href='#myCarousel' data-slide='next'><span class='glyphicon glyphicon-chevron-right'></span></a>"+
+		                            "</div>"
+
+
+
+
+									);//closing for historical zestimate html function
+
+
+							} //closing for if for validating the json response
+							else{
+									$('#tabs').hide();
+									$("#noresult").show();
+									$('#noresult').html(
+
+										"<h3 id='notFound'>No Exact Match Found - Verify that the given address is correct.</h3>"
+
+										);
+							}
+							
+						},
+						error: function(){
+							alert("error");
+						}
+					}); //end of ajax call
+					
+					
+		
+		
+				} //end of function handling submit handler
+		
+		
+			}); //end of validate
+   		}); // end of function for submit handler
+			
+		function fb_post(){
+            //alert("You Clicked me!!!");
+            FB.ui({
+	           method: 'feed',
+	           app_id: '342151452631808',
+	           link: obj.homedetails,
+	           name:obj.street+", "+obj.city+", "+obj.state+"-"+obj.zipcode,
+	           //name:"abcd",
+	           caption:"Property Information from Zillow.com",
+	           picture: obj.oneYearImage,
+	           description: "Last Sold Price:"+obj.lastSoldPrice+", 30 Days Overall Change: "+obj.facebookValue,
+	           },
+	           function(response){
+	           if(response && response.post_id) {
+                    alert("Posted Successfully"); 
+	           } else {
+                    alert("Error while Posting");
+               }
+	       });
+
+         }	
+
+		</script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+		<script type="text/javascript">
+			var $ = jQuery.noConflict();
+			$(document).ready(function() { 
+			  $('#myCarousel').carousel({ interval: 3000, cycle: true });
+			}); 
+
+		
+		</script>
+		<script type="text/javascript">
+
+
+		</script>
+	
+
+
+	<title> Real Estate Search</title>
+</head>
+<body background="http://www.neovisual.cz/files/V0779-d9.jpg">
+<script type="text/javascript" src="http://connect.facebook.net/en_US/all.js"></script>
+<script>    
+        window.fbAsyncInit = function() {
+	    // init the FB JS SDK
+	    FB.init({
+
+	      appId      : '342151452631808', // App ID from the App Dashboard
+	      channelUrl : 'http://localhost/hw8_client.html', // Channel File for x-domain communication
+	      status     : true, // check the login status upon init?
+	      cookie     : true, // set sessions cookies to allow your server to access the session?
+	      xfbml      : true  // parse XFBML tags on this page?
+	    });
+	
+	 // Here we subscribe to the auth.authResponseChange JavaScript event. This event is fired
+	  // for any authentication related change, such as login, logout or session refresh. This means that
+	  // whenever someone who was previously logged out tries to log in again, the correct case below 
+	  // will be handled. 
+	  FB.Event.subscribe('auth.authResponseChange', function(response) {
+	    // Here we specify what we do with the response anytime this event occurs. 
+	    if (response.status === 'connected') {
+	      // The response object is returned with a status field that lets the app know the current
+	      // login status of the person. In this case, we're handling the situation where they 
+	      // have logged in to the app.
+	      testAPI();
+	    } else if (response.status === 'not_authorized') {
+	      // In this case, the person is logged into Facebook, but not into the app, so we call
+	      // FB.login() to prompt them to do so. 
+	      // In real-life usage, you wouldn't want to immediately prompt someone to login 
+	      // like this, for two reasons:
+	      // (1) JavaScript created popup windows are blocked by most browsers unless they 
+	      // result from direct interaction from people using the app (such as a mouse click)
+	      // (2) it is a bad experience to be continually prompted to login upon page load.
+	      FB.login();
+	    } else {
+	      // In this case, the person is not logged into Facebook, so we call the login() 
+	      // function to prompt them to do so. Note that at this stage there is no indication
+	      // of whether they are logged into the app. If they aren't then they'll see the Login
+	      // dialog right after they log in to Facebook. 
+	      // The same caveats as above apply to the FB.login() call here.
+	      FB.login();
+	    }
+	  });
+	  };
+	  (function(d){
+		   var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
+		   if (d.getElementById(id)) {return;}
+		   js = d.createElement('script'); js.id = id; js.async = true;
+		   js.src = "//connect.facebook.net/en_US/all.js";
+		   ref.parentNode.insertBefore(js, ref);
+		  }(document));
+		FB.init({appId: "342151452631808", status: true, cookie: true});
+        
+        
+              
+    </script>
+
+
+ 
+	<div id="container">
+			<h2>Search your property here</h2>
+
+			<hr>
+
+			<form class="form-inline" role="form" id="searchForm">
+				
+				<div id="fb-root"></div>
+				<script>(function(d, s, id) {
+				  var js, fjs = d.getElementsByTagName(s)[0];
+				  if (d.getElementById(id)) return;
+				  js = d.createElement(s); js.id = id;
+				  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&appId=342151452631808&version=v2.0";
+				  fjs.parentNode.insertBefore(js, fjs);
+				}(document, 'script', 'facebook-jssdk'));</script>
+
+
+				<div class="form-group">
+				    <label for="streetAddress">Street address*</label>
+				    <input type="text" class="form-control" id="streetAddress" name="streetName" placeholder="Address" autocomplete="on">
+				 </div>
+
+				 <div class="form-group">
+				    <label for="city">City*</label>
+				    <input type="text" class="form-control" id="city" name="cityName" placeholder="City">
+				 </div>
+
+				 <div class="form-group">
+					<label for="state">State*</label>
+				 	<select class="form-control" id="state" name="stateName">
+					  <option value="" selected></option>
+						<option value="AK">AK</option>
+
+						<option value="AL">AL</option>
+						<option value="AR">AR</option>
+						<option value="AZ">AZ</option>
+						<option value="CA">CA</option>
+
+						<option value="CO">CO</option>
+						<option value="CT">CT</option>
+						<option value="DC">DC</option>
+						<option value="DE">DE</option>
+
+						<option value="FL">FL</option>
+						<option value="GA">GA</option>
+						<option value="HI">HI</option>
+						<option value="IA">IA</option>
+
+						<option value="ID">ID</option>
+						<option value="IL">IL</option>
+						<option value="IN">IN</option>
+						<option value="KS">KS</option>
+
+						<option value="KY">KY</option>
+						<option value="LA">LA</option>
+						<option value="MA">MA</option>
+						<option value="MD">MD</option>
+
+						<option value="ME">ME</option>
+						<option value="MI">MI</option>
+						<option value="MN">MN</option>
+						<option value="MO">MO</option>
+
+						<option value="MS">MS</option>
+						<option value="MT">MT</option>
+						<option value="NC">NC</option>
+						<option value="ND">ND</option>
+
+						<option value="NE">NE</option>
+						<option value="NH">NH</option>
+						<option value="NJ">NJ</option>
+						<option value="NM">NM</option>
+
+						<option value="NV">NV</option>
+						<option value="NY">NY</option>
+						<option value="OH">OH</option>
+						<option value="OK">OK</option>
+
+						<option value="OR">OR</option>
+						<option value="PA">PA</option>
+						<option value="RI">RI</option>
+						<option value="SC">SC</option>
+
+						<option value="SD">SD</option>
+						<option value="TN">TN</option>
+						<option value="TX">TX</option>
+						<option value="UT">UT</option>
+
+						<option value="VA">VA</option>
+						<option value="VT">VT</option>
+						<option value="WA">WA</option>
+						<option value="WI">WI</option>
+
+						<option value="WV">WV</option>
+						<option value="WY">WY</option>
+					</select>
+				 	
+				 </div>
+
+				 <div class="form-group">
+				      <button type="submit" class="btn btn-default" id="btnSbmt">Submit</button>
+				</div>
+				
+				<div class="form-group" style="display: inline-block">
+		                <img src="http://www.zillow.com/widgets/GetVersionedResource.htm?path=/static/logos/Zillowlogo_150x40_rounded.gif"
+		                      width="150" height="40" alt="Zillow Real Estate Search" />
+		        </div>
+				<hr>
+				<br>
+				<br>
+				
+			</form>
+				
+						<div id="emptySpace"></div>
+
+						<div id="noresult"></div>
+						<div id="tabs">
+							<!-- Tab navigation-->
+							<ul class="nav nav-tabs" role="tablist">
+							  <li role="presentation" class="active"><a href="#basicInfo" role="tab" data-toggle="tab">Basic Information</a></li>
+							  <li role="presentation"><a href="#historicalZestimate" role="tab" data-toggle="tab">Historical Zestimates</a></li>
+							  
+							</ul>
+
+							<!-- Tabs creation-->
+							<div class="tab-content" >
+
+								
+
+								<div class="tab-pane active" id="basicInfo"></div> <!-- div for tab pane class-->
+								
+								<div class="tab-pane fade" id="historicalZestimate"></div> <!-- div for tab pane class-->
+							</div> <!-- div for tab content class-->
+						</div> <!-- div closing for Tabs div-->
+
+
+
+
+</div>
+<noscript>
+</body>
+</html>
